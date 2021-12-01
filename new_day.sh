@@ -1,8 +1,7 @@
 #!/bin/bash
-
 DAY=$(printf "%02d" $1)
 DIR=day_$DAY
-SESSION_ID=${2:-53616c7465645f5f4b4159acacaebe68fe6d71fad6f2bbd9b56abcd7529c4994a362e9a3dee4c05802e53dee831cc530}
+SESSION_ID=${2:-53616c7465645f5f84dfb53cd64d9fa4741756fa6b70dec67c17c3f47a1d9858f17cb689cb1efa5af15a56f11f6e917b}
 
 echo $DAY
 echo $DIR
@@ -42,6 +41,6 @@ create $DIR/first.erl "first"
 create $DIR/second.erl "second"
 cd $DIR
 
-curl "https://adventofcode.com/2020/day/$1/input" \
+curl "https://adventofcode.com/2021/day/$1/input" \
   -H "cookie: session=$SESSION_ID" \
   --compressed -O input
