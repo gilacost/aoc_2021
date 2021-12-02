@@ -34,9 +34,13 @@ readlines(FileName) ->
 %     io:format("printing: ~p~n", [H]),
 %     [H | even_print(T)].
 
+% split(Binary, By) ->
+%     list_to_tuple(binary:split(Binary, By, [global])).
+
 parse([<<>>], Buffer) ->
     lists:reverse(Buffer);
 parse([<<H/binary>> | T], Buffer) ->
+    % {First, Second} = split(H, [<<" ">>]),
     {Number, <<>>} = string:to_integer(H),
     parse(T, [Number | Buffer]).
 EOF
