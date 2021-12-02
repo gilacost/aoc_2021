@@ -4,13 +4,7 @@
 
 main(Input) ->
     Lines = readlines(Input),
-    {X, Y} = lists:foldl(
-        fun(Instruction, Coordinates) ->
-            do_action(Instruction, Coordinates)
-        end,
-        {0, 0},
-        Lines
-    ),
+    {X, Y} = lists:foldl(fun do_action/2, {0, 0}, Lines),
     abs(X * Y).
 
 do_action({<<"up">>, Increment}, {X, Y}) -> {X, Y + Increment};
