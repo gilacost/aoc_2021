@@ -24,6 +24,7 @@ readlines(FileName) ->
     parse(BinSplit, []).
 
 % ocurrences(List, El, string) -> length([X || X <- List, [X] =:= El]),
+
 % even_print([]) ->
 %     [];
 
@@ -37,6 +38,24 @@ readlines(FileName) ->
 % split(Binary, By) ->
 %     list_to_tuple(binary:split(Binary, By, [global])).
 
+% build_acc(Length) ->
+%     [{0, 0} || _X <- lists:seq(1, Length)].
+
+% binary_list_to_decimal(BinList) ->
+%     BitsIndex = lists:reverse(lists:seq(0, length(BinList) - 1)),
+%     BinPowTuples = lists:zip(BitsIndex, BinList),
+%     lists:foldl(
+%         fun({Pow, Bit}, Acc) ->
+%             Base = base(Bit),
+%             case {Base, Pow} of
+%                 {0, 0} -> Acc;
+%                 _ -> Acc + math:pow(Base, Pow)
+%             end
+%         end,
+%         0,
+%         BinPowTuples
+%     ).
+
 parse([<<>>], Buffer) ->
     lists:reverse(Buffer);
 parse([<<H/binary>> | T], Buffer) ->
@@ -45,7 +64,6 @@ parse([<<H/binary>> | T], Buffer) ->
     parse(T, [Number | Buffer]).
 EOF
 }
-
 
 mkdir -p $DIR
 create $DIR/first.erl "first"
