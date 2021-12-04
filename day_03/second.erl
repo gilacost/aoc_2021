@@ -20,14 +20,13 @@ main(Input) ->
     ),
     OxygenGeneratorRating * Co2GeneratorRating.
 
-enabled([H | _T] = Lines, Index, oxigen) ->
+enabled([H | _T] = Lines, Index, Gas) ->
     Acc = build_acc(length(H)),
     CountBits = lists:foldl(fun count/2, Acc, Lines),
-    lists:nth(Index, lists:map(fun most_common/1, CountBits));
-enabled([H | _T] = Lines, Index, co2) ->
-    Acc = build_acc(length(H)),
-    CountBits = lists:foldl(fun count/2, Acc, Lines),
-    lists:nth(Index, lists:map(fun less_common/1, CountBits)).
+    lists:nth(Index, lists:map(generator(Gas), CountBits)).
+
+generator(oxigen) -> fun most_common/1;
+generator(co2) -> fun less_common/1.
 
 count(Bits, BitsAcc) ->
     lists:map(fun do_count/1, lists:zip(Bits, BitsAcc)).
