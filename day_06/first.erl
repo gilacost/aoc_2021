@@ -16,16 +16,30 @@ readlines(FileName) ->
     BinSplitCleanned = lists:delete(<<>>, BinSplit),
     InitialLanternFishs = parse(BinSplitCleanned, []),
     InitialState = #{newborns => 0, lantern_fish_list => InitialLanternFishs},
-    Days = lists:seq(1, 256),
+    Days = lists:seq(1, 18),
+
+    print_state(initial, InitialLanternFishs, [], -1),
     #{lantern_fish_list := FinalLanternFishList} =
         lists:foldl(
-            fun(_Day, #{lantern_fish_list := LanternFishList}) ->
+            fun(Day, #{lantern_fish_list := LanternFishList}) ->
+                print_state(after_days, LanternFishList, [], Day),
                 next_day(LanternFishList, #{newborns => 0, lantern_fish_list => []})
             end,
             InitialState,
             Days
         ),
     length(FinalLanternFishList).
+
+print_state(Label, [#lantern_fish{current_day = Day} | T], Buffer, DaysPassed) ->
+    print_state(Label, T, [Day | Buffer], DaysPassed);
+print_state(initial, [], Buffer, _DaysPassed) ->
+    Label = "Initial state: ",
+    io:format("~p ~p ~p ~w ~n", [Label, Buffer, lists:sum(Buffer), length(Buffer)]);
+print_state(after_days, [], Buffer, DaysPassed) ->
+    Label = "After ",
+    io:format("~p ~w days: ~w ~w ~w~n", [
+        Label, DaysPassed, Buffer, lists:sum(Buffer), length(Buffer)
+    ]).
 
 append_lintern_fishs(List, none) -> List;
 append_lintern_fishs(List, NewBorns) -> lists:append(List, NewBorns).
@@ -66,14 +80,9 @@ new_day(#lantern_fish{current_day = CurrentDay} = Lf) when
 new_day(#lantern_fish{current_day = 0} = Lf) ->
     {true, Lf#lantern_fish{current_day = 6}}.
 
-is_first_day(8) ->
-    true;
-is_first_day(_) ->
-    false.
-
 parse([], Buffer) ->
     Buffer;
 parse([<<H/binary>> | T], Buffer) ->
     {Day, <<>>} = string:to_integer(H),
-    LanternFish = #lantern_fish{current_day = Day, is_first_day = is_first_day(Day)},
+    LanternFish = #lantern_fish{current_day = Day},
     parse(T, [LanternFish | Buffer]).
