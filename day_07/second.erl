@@ -1,16 +1,4 @@
-#!/bin/bash
-DAY=$(printf "%02d" $1)
-DIR=day_$DAY
-SESSION_ID=${2:-$AOC_SESSION_ID}
-
-echo $DAY
-echo $DIR
-echo $SESSION_ID
-
-create ()
-{
-cat > $1 <<EOF
--module($2).
+-module(second).
 
 -export([main/1]).
 
@@ -24,15 +12,6 @@ readlines(FileName) ->
     parse(BinSplit, []).
 
 % ocurrences(List, El, string) -> length([X || X <- List, [X] =:= El]),
-
-% initial_state() ->
-%   lists:foldl(
-%       fun(Index, State) ->
-%           maps:put(Index, 0, State)
-%       end,
-%       #{},
-%       lists:seq(0, 8)
-%   ).
 
 % even_print([]) ->
 %     [];
@@ -128,14 +107,3 @@ parse([<<H/binary>> | T], Buffer) ->
     % {First, Second} = split(H, [<<" ">>]),
     {Number, <<>>} = string:to_integer(H),
     parse(T, [Number | Buffer]).
-EOF
-}
-
-mkdir -p $DIR
-create $DIR/first.erl "first"
-create $DIR/second.erl "second"
-cd $DIR
-
-curl "https://adventofcode.com/2021/day/$1/input" \
-  -H "cookie: session=$SESSION_ID" \
-  --compressed -O input
