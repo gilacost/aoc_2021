@@ -1,72 +1,79 @@
--module(first).
+-module(second).
 
 -export([main/1]).
 
--define(NUMBER_SEGMENTS_MAP, #{
-    2 => 1,
-    3 => 7,
-    4 => 4,
-    5 => {2, 3, 5},
-    6 => {0, 6, 9},
-    7 => 8
-}).
 main(Input) ->
-    #{1 := Ones, 4 := Fours, 7 := Sevens, 8 := Eights} = ResultsState = readlines(Input),
-    io:format("~w ~n", [ResultsState]),
-    Ones + Fours + Sevens + Eights.
+    Lines = readlines(Input),
+    lists:sum(Lines).
 
 readlines(FileName) ->
     {ok, Data} = file:read_file(FileName),
     BinSplit = split(Data, [<<"\n">>]),
-    parse_line(BinSplit, initial_state()).
+    parse_line(BinSplit, [], 1).
 
-initial_state() ->
-    #{
-        1 => 0,
-        7 => 0,
-        4 => 0,
-        {2, 3, 5} => 0,
-        {0, 6, 9} => 0,
-        8 => 0
-    }.
+decipher(String) when length(String) == 2 -> {String, 1};
+decipher(String) when length(String) == 3 -> {String, 7};
+decipher(String) when length(String) == 4 -> {String, 4};
+decipher(String) when length(String) == 7 -> {String, 8};
+decipher(_String) -> none.
 
-split(Binary, By) ->
-    binary:split(Binary, By, [global]).
+split(Binary, By) -> binary:split(Binary, By, [global]).
 
-parse_line([<<>>], StateMap) ->
-    StateMap;
-parse_line([<<RawLine/binary>> | T], StateMap) ->
-    [_Signals, ResultRaw] = split(RawLine, <<" | ">>),
-    io:format("Result raw: ~w ~n", [ResultRaw]),
-    Result = split(ResultRaw, <<" ">>),
-    io:format("Result raw: ~w ~n", [Result]),
-    NewStateMap = parse_result(Result, StateMap),
+parse_line([<<>>], LinesMap, _LineNum) ->
+    LinesMap;
+parse_line([<<RawLine/binary>> | T], LinesMap, LineNum) ->
+    [SignalsRaw, ResultRaw] = split(RawLine, <<" | ">>),
+    Signals = split(SignalsRaw, <<" ">>),
+    Results = lists:map(
+        fun(Bin) ->
+            lists:sort(binary_to_list(Bin))
+        end,
+        split(ResultRaw, <<" ">>)
+    ),
+    Uniq = get_unique(Signals, #{}),
+    WithComplex = get_complex(Signals, Uniq),
+    MappedResult = lists:map(
+        fun(Result) ->
+            integer_to_list(maps:get(Result, WithComplex))
+        end,
+        Results
+    ),
+    FinalResult = list_to_integer(string:join(MappedResult, "")),
+    parse_line(T, [FinalResult | LinesMap], LineNum + 1).
 
-    parse_line(T, NewStateMap).
+decipher_complex(String, 4, 3, 3) when length(String) == 5 -> {String, 2};
+decipher_complex(String, 3, 2, 2) when length(String) == 5 -> {String, 3};
+decipher_complex(String, 4, 2, 3) when length(String) == 5 -> {String, 5};
+decipher_complex(String, 4, 3, 3) when length(String) == 6 -> {String, 0};
+decipher_complex(String, 5, 3, 4) when length(String) == 6 -> {String, 6};
+decipher_complex(String, 4, 2, 3) when length(String) == 6 -> {String, 9};
+decipher_complex(_String, _, _, _) -> none.
 
-parse_result([], StateMap) ->
-    StateMap;
-parse_result([Result | T], StateMap) ->
-    Key = maps:get(length(binary_to_list(Result)), ?NUMBER_SEGMENTS_MAP),
-    io:format("key: ~p for:~w ~n", [Key, Result]),
-    NumberCount = maps:get(Key, StateMap),
-    NewStateMap = maps:put(Key, NumberCount + 1, StateMap),
-    parse_result(T, NewStateMap).
+get_complex([], Buffer) ->
+    Buffer;
+get_complex([Signal | T], #{1 := OneStr, 4 := FourStr, 7 := SevenStr} = Buffer) ->
+    SignalStr = binary_to_list(Signal),
 
-% -define(NUMBER_SEGMENTS_MAP, #{
-%     2 => 1,
-%     3 => 7,
-%     4 => 4,
-%     5 => {2, 3, 5},
-%     6 => {0, 6, 9},
-%     7 => 8
-% }).
-% initial_state() ->
-%     #{
-%         1 => 0,
-%         7 => 0,
-%         4 => 0,
-%         {2, 3, 5} => 0,
-%         {0, 6, 9} => 0,
-%         8 => 0
-%     }.
+    MinusOneLen = length(SignalStr -- OneStr),
+    MinusFourLen = length(SignalStr -- FourStr),
+    MinusSevenLen = length(SignalStr -- SevenStr),
+
+    NewBuffer =
+        case decipher_complex(SignalStr, MinusOneLen, MinusFourLen, MinusSevenLen) of
+            none -> Buffer;
+            {String, Value} -> maps:put(lists:sort(String), Value, Buffer)
+        end,
+    get_complex(T, NewBuffer).
+
+get_unique([], Buffer) ->
+    Buffer;
+get_unique([Signal | T], Buffer) ->
+    NewBuffer =
+        case decipher(binary_to_list(Signal)) of
+            none ->
+                Buffer;
+            {String, Value} ->
+                NewBufferIn = maps:put(lists:sort(String), Value, Buffer),
+                maps:put(Value, String, NewBufferIn)
+        end,
+    get_unique(T, NewBuffer).
