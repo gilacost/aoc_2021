@@ -27,7 +27,7 @@ insert(From, To, Map) ->
     ToList = maps:get(To, Map, []),
     maps:put(To, lists:usort([From | ToList]), FromDict).
 
-continue(Acc, Visited, Dest) =
-  if is_big(Cave) of
+% continue(Acc, Visited, Dest) =
+%   if is_big(Cave) of
 
 is_big(Cave) -> string:to_upper(Cave) == Cave.
