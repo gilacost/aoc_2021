@@ -52,21 +52,3 @@ parse_result([Result | T], StateMap) ->
     NumberCount = maps:get(Key, StateMap),
     NewStateMap = maps:put(Key, NumberCount + 1, StateMap),
     parse_result(T, NewStateMap).
-
-% -define(NUMBER_SEGMENTS_MAP, #{
-%     2 => 1,
-%     3 => 7,
-%     4 => 4,
-%     5 => {2, 3, 5},
-%     6 => {0, 6, 9},
-%     7 => 8
-% }).
-% initial_state() ->
-%     #{
-%         1 => 0,
-%         7 => 0,
-%         4 => 0,
-%         {2, 3, 5} => 0,
-%         {0, 6, 9} => 0,
-%         8 => 0
-%     }.

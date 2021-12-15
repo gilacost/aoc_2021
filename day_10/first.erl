@@ -51,7 +51,7 @@ parse_tokens([H | T], Final, Errored) ->
             breaks ->
                 throw([H])
         end,
-    io:format("Puto slice: ~p New List: ~p closes: ~p ~n ", [
+    io:format("Slice: ~p New List: ~p closes: ~p ~n ", [
         Prev, lists:reverse(NewList), closes(Prev, [H])
     ]),
     parse_tokens(T, NewListIn, NewErrored).
